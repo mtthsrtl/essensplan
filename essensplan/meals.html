@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Mahlzeiten verwalten</title>
+  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: url("img/back.webp") no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 28px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .meal-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+    .meal-item input {
+      flex: 1;
+      padding: 6px;
+    }
+    .meal-item img {
+      width: 60px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .meal-item button {
+      background: #c00;
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .meal-item button:hover {
+      background: #900;
+    }
+    .buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .btn {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn:hover { background: #555; }
+    .top-bar {
+      margin-bottom: 20px;
+    }
+    .top-bar button {
+      background: #666;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <button class="btn" onclick="window.location.href='index.html'">⬅️ Zurück</button>
+    </div>
+    <h1>Mahlzeiten verwalten</h1>
+    <div id="meals-list"></div>
+    <div class="buttons">
+      <button class="btn" onclick="addMeal()">➕ Neue Mahlzeit</button>
+      <button class="btn" onclick="saveMeals()">💾 Speichern</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "./api.php";
+    let data = { meals: [], plan: {}, history: {} };
+
+    async function loadMeals() {
+      try {
+        const res = await fetch(API_URL);
+        data = await res.json();
+      } catch (e) {
+        console.error("Fehler beim Laden:", e);
+      }
+      renderMeals();
+    }
+
+    function renderMeals() {
+      const list = document.getElementById("meals-list");
+      list.innerHTML = "";
+      data.meals.forEach((meal, index) => {
+        const row = document.createElement("div");
+        row.className = "meal-item";
+        row.innerHTML = `
+          <input type="text" value="${meal.name}" 
+                 onchange="data.meals[${index}].name=this.value">
+          <input type="text" value="${meal.image}" 
+                 onchange="data.meals[${index}].image=this.value">
+          <img src="${meal.image}" alt="${meal.name}">
+          <button onclick="deleteMeal(${index})">❌</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function addMeal() {
+      const newId = data.meals.length > 0 ? Math.max(...data.meals.map(m => m.id)) + 1 : 1;
+      data.meals.push({
+        id: newId,
+        name: "Neue Mahlzeit",
+        image: "img/"
+      });
+      renderMeals();
+    }
+
+    function deleteMeal(index) {
+      if (confirm("Diese Mahlzeit wirklich löschen?")) {
+        data.meals.splice(index, 1);
+        renderMeals();
+      }
+    }
+
+    async function saveMeals() {
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data, null, 2)
+        });
+        alert("Mahlzeiten gespeichert!");
+      } catch (e) {
+        console.error("Fehler beim Speichern:", e);
+      }
+    }
+
+    loadMeals();
+  </script>
+</body>
+</html>

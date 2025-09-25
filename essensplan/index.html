@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Essensplan</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+
+  <!-- iOS Web App -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Essensplan">
+  <link rel="apple-touch-icon" href="img/icon.png">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#333333">
+
+  <style>
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: url("img/back.jpg") no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed; /* Bild bleibt stehen */
+
+  color: #333;
+}
+    h1, h2 {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 48px;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr); /* 4 Spalten → 2 Reihen = 8 Tage */
+      gap: 12px;
+      margin: 0 20px;
+    }
+
+    .day {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      min-height: 380px; /* etwas höher für Stabilität */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .day-header {
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #555;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .day-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      scrollbar-width: none;
+      position: relative;
+    }
+    .day-content::-webkit-scrollbar { display: none; }
+
+    .pool {
+      margin: 0 20px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-start;
+    }
+
+    .meal {
+      min-height: 100px;
+      margin: 5px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      cursor: grab;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .pool .meal { flex: 0 0 160px; max-width: 160px; min-height: 200px; }
+    .day-content .meal { flex: 1 1 auto; width: 100%; }
+
+    .meal:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+    .meal::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0));
+      border-radius: 8px;
+    }
+
+.meal span {
+  display: -webkit-box;            /* Flexbox für Multiline-Ellipsis */
+  -webkit-box-orient: vertical;    /* vertikale Ausrichtung */
+  -webkit-line-clamp: 2;           /* max. 2 Zeilen */
+  overflow: hidden;                /* alles drüber abschneiden */
+  text-overflow: ellipsis;         /* ... am Ende */
+
+  max-width: 100%;                 /* nicht breiter als Karte */
+  box-sizing: border-box;          /* Padding sauber einrechnen */
+
+  position: relative;
+  color: #fff;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 22px;                 /* deine gewünschte Größe */
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+
+    /* Refresh Button */
+    .refresh-container {
+      text-align: center;
+      margin: 20px;
+    }
+    .refresh-btn {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .refresh-btn:hover {
+      background: #555;
+    }
+
+    /* Sperr-Overlay wenn Limit erreicht */
+    .day-content.locked::after {
+      content: "🔒 Max. 2 Gerichte";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      animation: fadeout 1s forwards;
+    }
+    @keyframes fadeout {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+	
+	
+	/* Burger Button */
+.burger {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  font-size: 32px;          /* größerer Icon-Text */
+  width: 48px;              /* fixe Fläche */
+  height: 48px;
+  line-height: 48px;
+  text-align: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #333;
+  z-index: 2000;
+}
+
+
+/* Menü */
+.menu {
+  position: absolute;
+  top: 50px;
+  left: 15px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  display: none;
+  flex-direction: column;
+  padding: 10px;
+  z-index: 1999;
+}
+
+.menu button {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  margin: 4px 0;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.menu button:hover {
+  background: #555;
+}
+
+
+  </style>
+</head>
+<body>
+<!-- Burger Menü -->
+<button class="burger" onclick="toggleMenu()">☰</button>
+<div id="menu" class="menu">
+  <button onclick="menuAction(loadData)">🔄 Aktualisieren</button>
+  <button onclick="menuAction(() => window.location.href='meals.html')">🍽️ Mahlzeiten</button>
+  <button onclick="menuAction(() => window.location.href='history.html')">🕒 Historie</button>
+</div>
+
+
+  <h1>Essensplan</h1>
+  <div class="container" id="days"></div>
+
+  <h2>Mahlzeitenpool</h2>
+  <div class="pool" id="meal-pool"></div>
+
+  <!-- Aktualisieren Button -->
+
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script>
+    const API_URL = "api.php";
+
+    let data = { meals: [], plan: {}, history: {} };
+    const today = new Date();
+    const todayKey = today.toISOString().split("T")[0];
+    const days = [];
+    for (let i = 0; i < 8; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      days.push(d.toISOString().split("T")[0]);
+    }
+
+    const pool = document.getElementById("meal-pool");
+    const daysContainer = document.getElementById("days");
+
+    function createMealElement(meal) {
+      const div = document.createElement("div");
+      div.className = "meal";
+      div.style.backgroundImage = meal.image ? `url("${meal.image}")` : "linear-gradient(135deg,#bbb,#888)";
+      div.dataset.id = meal.id;
+      const label = document.createElement("span");
+      label.textContent = meal.name;
+      div.appendChild(label);
+      return div;
+    }
+
+    function renderMeals() {
+      pool.innerHTML = "";
+      data.meals.forEach(m => {
+        const used = days.some(day => data.plan[day]?.includes(m.id));
+        if (!used) pool.appendChild(createMealElement(m));
+      });
+    }
+
+    function renderDays() {
+      daysContainer.innerHTML = "";
+      days.forEach(key => {
+        const d = new Date(key);
+        const col = document.createElement("div");
+        col.className = "day";
+        col.dataset.day = key;
+
+        const header = document.createElement("div");
+        header.className = "day-header";
+        header.textContent = d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "short" });
+        col.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "day-content";
+        (data.plan[key] || []).forEach(mealId => {
+          const meal = data.meals.find(m => m.id === mealId);
+          if (meal) content.appendChild(createMealElement(meal));
+        });
+        col.appendChild(content);
+        daysContainer.appendChild(col);
+
+        new Sortable(content, {
+          group: "meals",
+          animation: 150,
+          draggable: ".meal",
+          onAdd: function(evt) {
+            const mealsInDay = evt.to.querySelectorAll(".meal");
+            if (mealsInDay.length > 2) {
+              evt.from.appendChild(evt.item);
+              content.classList.add("locked");
+              setTimeout(() => content.classList.remove("locked"), 1000);
+            } else {
+              savePlan();
+            }
+          },
+          onRemove: savePlan
+        });
+      });
+    }
+
+    new Sortable(pool, { group: "meals", animation: 150, draggable: ".meal", onAdd: savePlan });
+
+    async function loadData() {
+      try {
+        const res = await fetch(API_URL);
+        data = await res.json();
+
+        if (!data.history) data.history = {};
+
+        // Alte Tage verschieben in history
+        Object.keys(data.plan).forEach(dateKey => {
+          if (new Date(dateKey) < new Date(todayKey)) {
+            data.history[dateKey] = data.plan[dateKey];
+            delete data.plan[dateKey];
+          }
+        });
+
+        saveData(); // nach Cleanup direkt zurückschreiben
+      } catch (e) {
+        console.error("Fehler beim Laden:", e);
+      }
+      renderMeals();
+      renderDays();
+    }
+
+    async function saveData() {
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data, null, 2)
+        });
+      } catch (e) {
+        console.error("Fehler beim Speichern:", e);
+      }
+    }
+
+    function savePlan() {
+      days.forEach(day => { data.plan[day] = []; });
+      document.querySelectorAll(".day-content").forEach(dayCol => {
+        const day = dayCol.parentElement.dataset.day;
+        dayCol.querySelectorAll(".meal").forEach(m => {
+          data.plan[day].push(parseInt(m.dataset.id, 10));
+        });
+      });
+      saveData();
+      renderMeals();
+    }
+
+    loadData();
+	
+	function toggleMenu() {
+  const menu = document.getElementById("menu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+function closeMenu() {
+  document.getElementById("menu").style.display = "none";
+}
+
+function menuAction(action) {
+  closeMenu();
+  action();
+}
+
+  </script>
+
+  <!-- Service Worker Registrierung -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("Service Worker registriert"))
+        .catch(err => console.error("SW Fehler:", err));
+    }
+  </script>
+</body>
+</html>

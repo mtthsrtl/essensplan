@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Essensplan – Historie</title>
+  <link rel="icon" type="image/x-icon" href="./img/favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: url("./img/back.jpg") no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    header button {
+      margin-right: 10px;
+      padding: 8px 14px;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+    }
+    header h1 {
+      flex: 1;
+      margin: 0;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .day-box {
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      min-height: 150px;
+    }
+
+    .day-header {
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 8px;
+      text-align: center;
+      color: #555;
+    }
+
+    .meal {
+      background-size: cover;
+      background-position: center;
+      border-radius: 6px;
+      min-height: 70px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+      overflow: hidden;
+    }
+    .meal::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0));
+    }
+    .meal span {
+      position: relative;
+      z-index: 1;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 6px 10px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button onclick="window.location.href='index.html'">⬅ Zurück</button>
+    <h1>Historie</h1>
+  </header>
+
+  <div class="calendar" id="calendar"></div>
+
+  <script>
+    const API_URL = "./api.php";
+    let data = { meals: [], history: {} };
+
+    async function loadHistory() {
+      try {
+        const res = await fetch(API_URL);
+        data = await res.json();
+        renderHistory();
+      } catch (e) {
+        console.error("Fehler beim Laden:", e);
+      }
+    }
+
+    function createMealElement(meal) {
+      const div = document.createElement("div");
+      div.className = "meal";
+      div.style.backgroundImage = meal.image ? `url("${meal.image}")` : "linear-gradient(135deg,#bbb,#888)";
+      const label = document.createElement("span");
+      label.textContent = meal.name;
+      div.appendChild(label);
+      return div;
+    }
+
+    function renderHistory() {
+      const calendar = document.getElementById("calendar");
+      calendar.innerHTML = "";
+
+      const historyKeys = Object.keys(data.history).sort((a, b) => new Date(b) - new Date(a)); // neueste zuerst
+      historyKeys.forEach(dateKey => {
+        const box = document.createElement("div");
+        box.className = "day-box";
+
+        const header = document.createElement("div");
+        const d = new Date(dateKey);
+        header.className = "day-header";
+        header.textContent = d.toLocaleDateString("de-DE", { weekday: "long", day: "numeric", month: "short", year: "numeric" });
+        box.appendChild(header);
+
+        (data.history[dateKey] || []).forEach(mealId => {
+          const meal = data.meals.find(m => m.id === mealId);
+          if (meal) box.appendChild(createMealElement(meal));
+        });
+
+        calendar.appendChild(box);
+      });
+    }
+
+    loadHistory();
+  </script>
+</body>
+</html>

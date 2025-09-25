@@ -1,0 +1,156 @@
+{
+    "meals": [
+        {
+            "id": 1,
+            "name": "Spaghetti",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 2,
+            "name": "Pizza",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 3,
+            "name": "Indisches Curry",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 4,
+            "name": "Salat",
+            "image": "img/meal2.png"
+        },
+        {
+            "id": 5,
+            "name": "Lasagne",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 6,
+            "name": "Burger",
+            "image": "img/meal3.png"
+        },
+        {
+            "id": 7,
+            "name": "Balau",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 8,
+            "name": "Schweinebraten",
+            "image": "img/meal2.png"
+        },
+        {
+            "id": 9,
+            "name": "Pichelsteiner",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 10,
+            "name": "Sp\u00e4tzle mit Lende",
+            "image": "img/meal2.png"
+        },
+        {
+            "id": 12,
+            "name": "Pommes",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 13,
+            "name": "Fischst\u00e4bchen",
+            "image": "img/meal2.png"
+        },
+        {
+            "id": 14,
+            "name": "Resteessen",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 15,
+            "name": "Schnitzel",
+            "image": "img/meal3.png"
+        },
+        {
+            "id": 16,
+            "name": "Chili Con Carne",
+            "image": "img/meal2.png"
+        },
+        {
+            "id": 17,
+            "name": "Endiviensalat",
+            "image": "img/meal.png"
+        },
+        {
+            "id": 18,
+            "name": "Essen gehen",
+            "image": "img/meal3.png"
+        },
+        {
+            "id": 19,
+            "name": "Gyros mit Reis",
+            "image": "img/meal2.png"
+        },
+        {
+            "id": 20,
+            "name": "Kartoffeln",
+            "image": "img/meal3.png"
+        },
+        {
+            "id": 21,
+            "name": "Manti",
+            "image": "img/meal2.png"
+        }
+    ],
+    "plan": {
+        "2025-09-25": [
+            6
+        ],
+        "2025-09-26": [
+            9,
+            19
+        ],
+        "2025-09-27": [
+            10
+        ],
+        "2025-09-28": [
+            8,
+            17
+        ],
+        "2025-09-29": [
+            16
+        ],
+        "2025-09-30": [
+            13,
+            4
+        ],
+        "2025-10-01": [
+            7,
+            12
+        ],
+        "2025-10-02": [
+            18
+        ],
+        "2025-10-03": [],
+        "2025-10-04": []
+    },
+    "history": {
+        "2025-09-24": [
+            1
+        ],
+        "2025-09-23": [
+            2
+        ],
+        "2025-09-22": [
+            3
+        ],
+        "2025-09-21": [
+            4
+        ],
+        "2025-09-20": [
+            5
+        ],
+        "2025-09-19": [
+            6
+        ]
+    }
+}
